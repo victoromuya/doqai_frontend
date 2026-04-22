@@ -1,7 +1,8 @@
 const ACTIONS = [
   { id: "classify", label: "Classify", hint: "Identify the document type" },
-  { id: "extract",  label: "Extract text", hint: "Pull all readable text" },
-  { id: "both",     label: "Both", hint: "Classify and extract together" },
+  { id: "extract", label: "Extract text", hint: "Pull all readable text" },
+  { id: "rewrite", label: "Rewrite resume", hint: "Tailor the CV to a job description" },
+  // { id: "all", label: "All results", hint: "Classification, extracted text, and rewrite" },
 ];
 
 export default function ActionPicker({ value, onChange, disabled }) {

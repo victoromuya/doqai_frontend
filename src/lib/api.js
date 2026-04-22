@@ -1,6 +1,6 @@
 
 export const API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL || "https://doqai.onrender.com").replace(/\/$/, "");
+  (import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
 export const CLASSIFY_EXTRACT_PATH = "/api/v1/upload/"; 
 
 /**
@@ -8,25 +8,32 @@ export const CLASSIFY_EXTRACT_PATH = "/api/v1/upload/";
  * Backend always returns { message, document_type, text }.
  * The frontend is responsible for showing only what the user asked for.
  */
-export async function processDocument(file) {
+export async function processDocument(file, options = {}) {
   const form = new FormData();
   form.append("file", file);
-
-  let res;
-  try {
-    res = await fetch(`${API_BASE_URL}${CLASSIFY_EXTRACT_PATH}`, {
-      method: "POST",
-      body: form,
-    });
-  } catch (error) {
-    throw new Error(
-      `Network error reaching ${API_BASE_URL}. Check that the backend is running and that CORS allows your frontend origin.`
-    );
+  if (options.jobDescription) {
+    form.append("job_description", options.jobDescription);
   }
 
+  const res = await fetch(`${API_BASE_URL}${CLASSIFY_EXTRACT_PATH}`, {
+    method: "POST",
+    body: form,
+  });
+
   if (!res.ok) {
-    const txt = await res.text().catch(() => "");
-    throw new Error(`API error ${res.status}: ${txt || res.statusText}`);
+    // Try to parse the JSON error, fallback to raw text if it fails
+    let errorData;
+    try {
+      errorData = await res.json();
+    } catch (e) {
+      errorData = await res.text();
+    }
+    
+    // Throw an object instead of a string so the UI can pick out 'message'
+    const error = new Error("API Request Failed");
+    error.status = res.status;
+    error.data = errorData;
+    throw error;
   }
   return res.json();
 }

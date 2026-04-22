@@ -2,8 +2,9 @@ import { downloadPdf, downloadDocx } from "../lib/exporters";
 
 export default function ResultPanel({ result, action, fileName, onReset }) {
   if (!result) return null;
-  const showClass = action === "classify" || action === "both";
-  const showText = action === "extract" || action === "both";
+  const showClass = action === "classify" || action === "all";
+  const showText = action === "extract" || action === "all";
+  const showRewrite = action === "rewrite" || action === "all";
 
   return (
     <section className="relative overflow-hidden rounded-2xl border border-border bg-card p-8 shadow-sm">
@@ -43,13 +44,13 @@ export default function ResultPanel({ result, action, fileName, onReset }) {
             </div>
             <div className="flex gap-2">
               <button
-                onClick={() => downloadPdf({ fileName, documentType: result.document_type, text: result.text })}
+                onClick={() => downloadPdf({ fileName, documentType: result.document_type, text: result.text, kind: "extract" })}
                 className="rounded-md border border-foreground bg-foreground px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-background hover:bg-accent hover:border-accent"
               >
                 ↓ PDF
               </button>
               <button
-                onClick={() => downloadDocx({ fileName, documentType: result.document_type, text: result.text })}
+                onClick={() => downloadDocx({ fileName, documentType: result.document_type, text: result.text, kind: "extract" })}
                 className="rounded-md border border-border px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-foreground hover:border-accent hover:text-accent"
               >
                 ↓ Word
@@ -57,7 +58,34 @@ export default function ResultPanel({ result, action, fileName, onReset }) {
             </div>
           </div>
           <pre className="mt-4 max-h-[480px] overflow-auto whitespace-pre-wrap rounded-lg border border-border bg-background p-5 font-mono text-sm leading-relaxed text-foreground">
-          {result.text || "(no text returned)"}
+{result.text || "(no text returned)"}
+          </pre>
+        </div>
+      )}
+
+      {showRewrite && (
+        <div className="mt-8">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+              Rewritten CV
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => downloadPdf({ fileName, documentType: result.document_type, text: result.rewritten_cv, kind: "rewrite" })}
+                className="rounded-md border border-foreground bg-foreground px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-background hover:bg-accent hover:border-accent"
+              >
+                ↓ PDF
+              </button>
+              <button
+                onClick={() => downloadDocx({ fileName, documentType: result.document_type, text: result.rewritten_cv, kind: "rewrite" })}
+                className="rounded-md border border-border px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-foreground hover:border-accent hover:text-accent"
+              >
+                ↓ Word
+              </button>
+            </div>
+          </div>
+          <pre className="mt-4 max-h-[480px] overflow-auto whitespace-pre-wrap rounded-lg border border-border bg-background p-5 font-mono text-sm leading-relaxed text-foreground">
+{result.rewritten_cv || "(no rewritten resume returned)"}
           </pre>
         </div>
       )}

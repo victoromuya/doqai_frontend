@@ -8,8 +8,23 @@ export default function Dropzone({ file, onFile }) {
 
   const pick = (f) => {
     if (!f) return;
+
+    // 1. Define the limit (1024 KB = 1,048,576 Bytes)
+    const MAX_SIZE = 1024 * 1024; 
+
+    // 2. Check file size
+    if (f.size > MAX_SIZE) {
+      alert(`File is too large. Please upload a document smaller than 1MB (1024 KB).`);
+      // Reset the input so the same large file can't be "picked" again immediately
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+
     onFile(f);
   };
+
+  // ... rest of your component code remains the same ...
+
 
   return (
     <div
