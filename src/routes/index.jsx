@@ -3,6 +3,7 @@ import Dropzone from "../components/Dropzone";
 import ActionPicker from "../components/ActionPicker";
 import ResultPanel from "../components/ResultPanel";
 import { processDocument } from "../lib/api";
+import { extractOnly } from "../lib/api";
 
 import { Textarea } from "../components/ui/textarea";
 
@@ -49,31 +50,39 @@ const ACTION_PROGRESS = {
     setJobDescription("");
   };
 
-  const submit = async () => {
-    if (!file) return;
-    if (needsJobDescription && !jobDescription.trim()) {
-      setError("Add a job description to rewrite the resume.");
-      return;
-    }
-    
-    setLoading(true);
-    setError("");
-    setResult(null);
+ const submit = async () => {
+  if (!file) return;
 
-    try {
-      const data = await processDocument(file, {
+  if (needsJobDescription && !jobDescription.trim()) {
+    setError("Add a job description to rewrite the resume.");
+    return;
+  }
+
+  setLoading(true);
+  setError("");
+  setResult(null);
+
+  try {
+    let data;
+
+    if (action === "extract") {
+      data = await extractOnly(file);
+    } else {
+      data = await processDocument(file, {
         jobDescription: needsJobDescription ? jobDescription.trim() : "",
       });
-      setResult(data);
-    } catch (e) {
-      // Access the curated message we created in the Django view
-      const displayMessage = e.data?.message || "Something went wrong. Please try again.";
-      setError(displayMessage);
-    } finally {
-      setLoading(false);
     }
-  };
 
+    setResult(data);
+  } catch (e) {
+    // keep your existing backend-aware error handling
+    const displayMessage =
+      e.data?.message || e.message || "Something went wrong. Please try again.";
+    setError(displayMessage);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <main className="relative min-h-screen overflow-hidden">

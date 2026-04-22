@@ -1,7 +1,9 @@
 
 export const API_BASE_URL =
   (import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
+
 export const CLASSIFY_EXTRACT_PATH = "/api/v1/upload/"; 
+export const EXTRACT_ONLY_PATH = "/api/v1/upload/extract/";
 
 /**
  * Calls the document classification + extraction API.
@@ -30,6 +32,32 @@ export async function processDocument(file, options = {}) {
     }
     
     // Throw an object instead of a string so the UI can pick out 'message'
+    const error = new Error("API Request Failed");
+    error.status = res.status;
+    error.data = errorData;
+    throw error;
+  }
+  return res.json();
+}
+
+
+export async function extractOnly(file) {
+  const form = new FormData();
+  form.append("file", file);
+
+  const res = await fetch(`${API_BASE_URL}${EXTRACT_ONLY_PATH}`, {
+    method: "POST",
+    body: form,
+  });
+
+  if (!res.ok) {
+    let errorData;
+    try {
+      errorData = await res.json();
+    } catch (e) {
+      errorData = await res.text();
+    }
+    
     const error = new Error("API Request Failed");
     error.status = res.status;
     error.data = errorData;

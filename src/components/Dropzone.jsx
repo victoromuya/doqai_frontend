@@ -81,7 +81,7 @@ export default function Dropzone({ file, onFile }) {
               Drop a document, <span className="italic text-accent">or click to browse</span>
             </p>
             <p className="max-w-md font-mono text-xs uppercase tracking-widest text-muted-foreground">
-              PNG · JPG · JPEG · PDF · TXT
+              PNG · JPG · JPEG · PDF · TXT - not more that 1000KB 
             </p>
           </>
         )}
