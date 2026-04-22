@@ -57,7 +57,7 @@ export default function ResultPanel({ result, action, fileName, onReset }) {
             </div>
           </div>
           <pre className="mt-4 max-h-[480px] overflow-auto whitespace-pre-wrap rounded-lg border border-border bg-background p-5 font-mono text-sm leading-relaxed text-foreground">
-{result.text || "(no text returned)"}
+          {result.text || "(no text returned)"}
           </pre>
         </div>
       )}
