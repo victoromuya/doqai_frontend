@@ -1,25 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import Dropzone from "../components/Dropzone";
 import ActionPicker from "../components/ActionPicker";
 import ResultPanel from "../components/ResultPanel";
 import { processDocument } from "../lib/api";
 
-export const Route = createFileRoute("/")({
-  component: Index,
-  head: () => ({
-    meta: [
-      { title: "Lexicon — Document Classification & Text Extraction" },
-      {
-        name: "description",
-        content:
-          "Upload a PDF, image, or text file. Classify its type and extract its text. Download results as PDF or Word.",
-      },
-    ],
-  }),
-});
+export default function Index() {
 
-function Index() {
   const [file, setFile] = useState(null);
   const [action, setAction] = useState("both");
   const [loading, setLoading] = useState(false);
@@ -41,7 +27,7 @@ function Index() {
       const data = await processDocument(file);
       setResult(data);
     } catch (e) {
-      setError(e.message || "Something went wrong");
+      setError("Try again after a few seconds");
     } finally {
       setLoading(false);
     }
