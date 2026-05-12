@@ -4,6 +4,7 @@ export const API_BASE_URL =
 
 export const CLASSIFY_EXTRACT_PATH = "/api/v1/upload/"; 
 export const EXTRACT_ONLY_PATH = "/api/v1/upload/extract/";
+export const QUERY_PATH = "/api/v1/query/";
 
 /**
  * Calls the document classification + extraction API.
@@ -16,7 +17,7 @@ export async function processDocument(file, options = {}) {
   if (options.jobDescription) {
     form.append("job_description", options.jobDescription);
   }
-
+ 
   const res = await fetch(`${API_BASE_URL}${CLASSIFY_EXTRACT_PATH}`, {
     method: "POST",
     body: form,
@@ -48,6 +49,31 @@ export async function extractOnly(file) {
   const res = await fetch(`${API_BASE_URL}${EXTRACT_ONLY_PATH}`, {
     method: "POST",
     body: form,
+  });
+
+  if (!res.ok) {
+    let errorData;
+    try {
+      errorData = await res.json();
+    } catch (e) {
+      errorData = await res.text();
+    }
+    
+    const error = new Error("API Request Failed");
+    error.status = res.status;
+    error.data = errorData;
+    throw error;
+  }
+  return res.json();
+}
+
+export async function queryDocuments(query) {
+  const res = await fetch(`${API_BASE_URL}${QUERY_PATH}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query }),
   });
 
   if (!res.ok) {

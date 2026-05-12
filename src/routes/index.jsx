@@ -4,6 +4,7 @@ import ActionPicker from "../components/ActionPicker";
 import ResultPanel from "../components/ResultPanel";
 import { processDocument } from "../lib/api";
 import { extractOnly } from "../lib/api";
+import { queryDocuments } from "../lib/api";
 
 import { Textarea } from "../components/ui/textarea";
 
@@ -14,17 +15,20 @@ const ACTION_PROGRESS = {
   classify: ["Uploading file", "Classifying document"],
   extract: ["Uploading file", "Extracting text"],
   rewrite: ["Uploading file", "Rewriting resume"],
+  query: ["Processing query", "Retrieving answer"],
   // all: ["Uploading file", "Classifying document", "Extracting text", "Rewriting resume"],
 };
 
  const [file, setFile] = useState(null);
   const [action, setAction] = useState("classify");
   const [jobDescription, setJobDescription] = useState("");
+  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
   const [currentStep, setCurrentStep] = useState(0);
   const needsJobDescription = action === "rewrite" //|| action === "all";
+  const needsQuery = action === "query";
   const progressSteps = useMemo(() => ACTION_PROGRESS[action] || ACTION_PROGRESS.all, [action]);
 
   useEffect(() => {
@@ -48,10 +52,18 @@ const ACTION_PROGRESS = {
     setResult(null);
     setError("");
     setJobDescription("");
+    setQuery("");
   };
 
  const submit = async () => {
-  if (!file) return;
+  if (action === "query") {
+    if (!query.trim()) {
+      setError("Please enter a query.");
+      return;
+    }
+  } else {
+    if (!file) return;
+  }
 
   if (needsJobDescription && !jobDescription.trim()) {
     setError("Add a job description to rewrite the resume.");
@@ -67,6 +79,8 @@ const ACTION_PROGRESS = {
 
     if (action === "extract") {
       data = await extractOnly(file);
+    } else if (action === "query") {
+      data = await queryDocuments(query.trim());
     } else {
       data = await processDocument(file, {
         jobDescription: needsJobDescription ? jobDescription.trim() : "",
@@ -94,7 +108,7 @@ const ACTION_PROGRESS = {
             <div className="flex items-center gap-3">
               <div className="h-3 w-3 rotate-45 bg-accent" />
               <span className="font-mono text-xs uppercase tracking-[0.25em] text-foreground">
-                Lexicon / v1
+                Lexicon / v2
               </span>
             </div>
             <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
@@ -110,15 +124,23 @@ const ACTION_PROGRESS = {
           <p className="max-w-xl font-mono text-sm leading-relaxed text-muted-foreground">
             Drop a PDF, image, or text file. Our model classifies it — resume,
             questionnaire, invoice, or otherwise — pulls every readable
-            character out, and can rewrite a resume for a target role.
+            character out, and can rewrite a resume for a target role. 
+            Also supports Q&A based on the document content.
           </p>
         </header>
 
         {/* Workflow */}
         <div className="space-y-10">
-          <Dropzone file={file} onFile={(f) => { setFile(f); setResult(null); setError(""); }} />
+          {action !== "query" && <Dropzone file={file} onFile={(f) => { setFile(f); setResult(null); setError(""); }} />}
 
-          <ActionPicker value={action} onChange={setAction} disabled={loading} />
+          <ActionPicker value={action} onChange={(newAction) => { 
+            setAction(newAction); 
+            if (newAction === "query") {
+              setFile(null);
+            }
+            setResult(null); 
+            setError(""); 
+          }} disabled={loading} />
 
           {needsJobDescription && (
             <section className="space-y-4">
@@ -137,10 +159,27 @@ const ACTION_PROGRESS = {
             </section>
           )}
 
+          {needsQuery && (
+            <section className="space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="tag"><span className="tag-dot" />Step 03 — Enter your question</span>
+              </div>
+              <div className="field-shell p-4">
+                <Textarea
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Ask a question about the document content. For example: 'What is the total amount?' or 'Summarize the main points.'"
+                  disabled={loading}
+                  className="min-h-20 border-0 bg-transparent px-0 py-0 font-mono text-sm shadow-none focus-visible:ring-0"
+                />
+              </div>
+            </section>
+          )}
+
           <div className="flex flex-wrap items-center gap-4">
             <button
               onClick={submit}
-              disabled={!file || loading}
+              disabled={(!file && action !== "query") || (action === "query" && !query.trim()) || loading}
               className="group inline-flex items-center gap-3 rounded-full bg-foreground px-7 py-4 font-mono text-xs uppercase tracking-[0.22em] text-background transition-all hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
             >
               {loading ? (
@@ -216,7 +255,7 @@ const ACTION_PROGRESS = {
             <ResultPanel
               result={result}
               action={action}
-              fileName={file?.name}
+              fileName={action !== "query" ? file?.name : null}
               onReset={reset}
             />
           )}
@@ -228,7 +267,7 @@ const ACTION_PROGRESS = {
             © Lexicon
           </span>
           <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-            classify · extract · export
+            classify · extract · export · query
           </span>
         </footer>
       </div>

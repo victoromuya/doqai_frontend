@@ -5,6 +5,7 @@ export default function ResultPanel({ result, action, fileName, onReset }) {
   const showClass = action === "classify" || action === "all";
   const showText = action === "extract" || action === "all";
   const showRewrite = action === "rewrite" || action === "all";
+  const showQueryResult = action === "query" || action === "all";
 
   return (
     <section className="relative overflow-hidden rounded-2xl border border-border bg-card p-8 shadow-sm">
@@ -58,7 +59,7 @@ export default function ResultPanel({ result, action, fileName, onReset }) {
             </div>
           </div>
           <pre className="mt-4 max-h-[480px] overflow-auto whitespace-pre-wrap rounded-lg border border-border bg-background p-5 font-mono text-sm leading-relaxed text-foreground">
-{result.text || "(no text returned)"}
+              {result.text || "(no text extracted)"}
           </pre>
         </div>
       )}
@@ -85,8 +86,39 @@ export default function ResultPanel({ result, action, fileName, onReset }) {
             </div>
           </div>
           <pre className="mt-4 max-h-[480px] overflow-auto whitespace-pre-wrap rounded-lg border border-border bg-background p-5 font-mono text-sm leading-relaxed text-foreground">
-{result.rewritten_cv || "(no rewritten resume returned)"}
+            {result.rewritten_cv || "(no CV Rewritten)"}
           </pre>
+        </div>
+      )}
+
+      {showQueryResult && (
+        <div className="mt-8">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+              Query Answer
+            </div>
+          </div>
+          <div className="mt-4 rounded-lg border border-border bg-background p-5">
+            <div className="font-mono text-sm leading-relaxed text-foreground">
+              {result.data?.answer || result.answer || "(no answer returned)"}
+            </div>
+          </div>
+          {result.data?.sources && result.data.sources.length > 0 && (
+            <div className="mt-6">
+              <div className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+                Source Chunks
+              </div>
+              <div className="mt-2 space-y-2">
+                {result.data.sources.map((source, index) => (
+                  <div key={index} className="rounded-lg border border-border bg-card p-3">
+                    <pre className="whitespace-pre-wrap font-mono text-xs text-muted-foreground">
+                      {source}
+                    </pre>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </section>
