@@ -20,7 +20,7 @@ const ACTION_PROGRESS = {
 };
 
  const [file, setFile] = useState(null);
-  const [action, setAction] = useState("classify");
+  const [action, setAction] = useState("extract");
   const [jobDescription, setJobDescription] = useState("");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -127,6 +127,11 @@ const ACTION_PROGRESS = {
             character out, and can rewrite a resume for a target role. 
             Also supports Q&A based on the document content.
           </p>
+          <div className="rounded-lg border border-accent/20 bg-accent/5 p-4">
+            <p className="font-mono text-sm text-accent">
+              <strong>Tip:</strong> Start by extracting text first to see the document content before choosing other actions.
+            </p>
+          </div>
         </header>
 
         {/* Workflow */}

@@ -1,6 +1,6 @@
 const ACTIONS = [
-  { id: "classify", label: "Classify", hint: "Identify the document type" },
   { id: "extract", label: "Extract text", hint: "Pull all readable text" },
+  { id: "classify", label: "Classify", hint: "Identify the document type" },
   { id: "rewrite", label: "Rewrite resume", hint: "Tailor the CV to a job description" },
   { id: "query", label: "Ask a question", hint: "Get an answer based on the document" },
   // { id: "all", label: "All results", hint: "Classification, extracted text, and rewrite" },
